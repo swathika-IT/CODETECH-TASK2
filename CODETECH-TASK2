@@ -1,0 +1,219 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+// Linked List Node
+struct ListNode {
+    int data;
+    struct ListNode* next;
+};
+void insertAtEnd(struct ListNode** head, int data) {
+    struct ListNode* newNode = malloc(sizeof(struct ListNode));
+    if (!newNode) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+    newNode->data = data;
+    newNode->next = NULL;
+    if (!*head) {
+        *head = newNode;
+        return;
+    }
+    struct ListNode* temp = *head;
+    while (temp->next) temp = temp->next;
+    temp->next = newNode;
+}
+void deleteNode(struct ListNode** head, int key) {
+    struct ListNode *temp = *head, *prev = NULL;
+    if (temp && temp->data == key) {
+        *head = temp->next;
+        free(temp);
+        return;
+    }
+    while (temp && temp->data != key) {
+        prev = temp;
+        temp = temp->next;
+    }
+    if (temp) {
+        prev->next = temp->next;
+        free(temp);
+    } else {
+        printf("Node with value %d not found!\n", key);
+    }
+}
+void printList(struct ListNode* head) {
+    while (head) {
+        printf("%d -> ", head->data);
+        head = head->next;
+    }
+    printf("NULL\n");
+}
+// Binary Tree Node
+struct TreeNode {
+    int data;
+    struct TreeNode *left, *right;
+};
+struct TreeNode* createTreeNode(int data) {
+    struct TreeNode* newNode = malloc(sizeof(struct TreeNode));
+    if (!newNode) {
+        printf("Memory allocation failed!\n");
+        return NULL;
+    }
+    newNode->data = data;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
+void inorderTraversal(struct TreeNode* root) {
+    if (!root) return;
+    inorderTraversal(root->left);
+    printf("%d ", root->data);
+    inorderTraversal(root->right);
+}
+void preorderTraversal(struct TreeNode* root) {
+    if (!root) return;
+    printf("%d ", root->data);
+    preorderTraversal(root->left);
+    preorderTraversal(root->right);
+}
+void postorderTraversal(struct TreeNode* root) {
+    if (!root) return;
+    postorderTraversal(root->left);
+    postorderTraversal(root->right);
+    printf("%d ", root->data);
+}
+// Graph
+struct Graph {
+    int vertices;
+    int** adjMatrix;
+};
+struct Graph* createGraph(int vertices) {
+    struct Graph* graph = malloc(sizeof(struct Graph));
+    if (!graph) {
+        printf("Memory allocation failed!\n");
+        return NULL;
+    }
+    graph->vertices = vertices;
+    graph->adjMatrix = malloc(vertices * sizeof(int*));
+    if (!graph->adjMatrix) {
+        printf("Memory allocation failed!\n");
+        free(graph);
+        return NULL;
+    }
+    for (int i = 0; i < vertices; i++) {
+        graph->adjMatrix[i] = calloc(vertices, sizeof(int));
+        if (!graph->adjMatrix[i]) {
+            printf("Memory allocation failed!\n");
+            free(graph->adjMatrix);
+            free(graph);
+            return NULL;
+        }
+    }
+    return graph;
+}
+void addEdge(struct Graph* graph, int src, int dest) {
+    if (src >= graph->vertices || dest >= graph->vertices) {
+        printf("Invalid edge!\n");
+        return;
+    }
+    graph->adjMatrix[src][dest] = 1;
+    graph->adjMatrix[dest][src] = 1; // Undirected graph
+}
+void printGraph(struct Graph* graph) {
+    for (int i = 0; i < graph->vertices; i++) {
+        printf("Vertex %d: ", i);
+        for (int j = 0; j < graph->vertices; j++) {
+            printf("%d ", graph->adjMatrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+int main() {
+    int choice;
+    while (true) {
+        printf("\nChoose a data structure to interact with:\n");
+        printf("1. Linked List\n2. Binary Tree\n3. Graph\n4. Exit\nYour choice: ");
+        scanf("%d", &choice);
+      if (choice == 1) {
+            struct ListNode* listHead = NULL;
+            int subChoice, data;
+            do {
+                printf("\nLinked List Operations:\n");
+                printf("1. Insert\n2. Delete\n3. Print\n4. Back\nYour choice: ");
+                scanf("%d", &subChoice);
+                if (subChoice == 1) {
+                    printf("Enter value to insert: ");
+                    scanf("%d", &data);
+                    insertAtEnd(&listHead, data);
+                } else if (subChoice == 2) {
+                    printf("Enter value to delete: ");
+                    scanf("%d", &data);
+                    deleteNode(&listHead, data);
+                } else if (subChoice == 3) {
+                    printList(listHead);
+                }
+            } while (subChoice != 4);
+         } else if (choice == 2) {
+            struct TreeNode* root = NULL;
+            int subChoice, data;
+            do {
+                printf("\nBinary Tree Operations:\n");
+                printf("1. Insert\n2. Inorder Traversal\n3. Preorder Traversal\n4. Postorder Traversal\n5. Back\nYour choice: ");
+                scanf("%d", &subChoice);
+                if (subChoice == 1) {
+                    printf("Enter value to insert: ");
+                    scanf("%d", &data);
+                    if (!root) {
+                        root = createTreeNode(data);
+                    } else {
+                        struct TreeNode* temp = root, *prev = NULL;
+                        while (temp) {
+                            prev = temp;
+                            temp = (data < temp->data) ? temp->left : temp->right;
+                        }
+                        if (data < prev->data) prev->left = createTreeNode(data);
+                        else prev->right = createTreeNode(data);
+                    }
+                } else if (subChoice == 2) {
+                    printf("Inorder: ");
+                    inorderTraversal(root);
+                    printf("\n");
+                } else if (subChoice == 3) {
+                    printf("Preorder: ");
+                    preorderTraversal(root);
+                    printf("\n");
+                } else if (subChoice == 4) {
+                    printf("Postorder: ");
+                    postorderTraversal(root);
+                    printf("\n");
+                }
+            } while (subChoice != 5);
+
+        } else if (choice == 3) {
+            struct Graph* graph = NULL;
+            int vertices, subChoice, src, dest;
+            do {
+                printf("\nGraph Operations:\n");
+                printf("1. Create Graph\n2. Add Edge\n3. Print Graph\n4. Back\nYour choice: ");
+                scanf("%d", &subChoice);
+                if (subChoice == 1) {
+                    printf("Enter number of vertices: ");
+                    scanf("%d", &vertices);
+                    graph = createGraph(vertices);
+                } else if (subChoice == 2 && graph) {
+                    printf("Enter source and destination vertices: ");
+                    scanf("%d %d", &src, &dest);
+                    addEdge(graph, src, dest);
+                } else if (subChoice == 3 && graph) {
+                    printGraph(graph);
+                } else if (!graph) {
+                    printf("Graph not created yet.\n");
+                }
+            } while (subChoice != 4);
+       } else if (choice == 4) {
+            printf("Exiting program.\n");
+            break;
+        } else {
+            printf("Invalid choice. Try again.\n");
+        }
+    }
+    return 0;
+}
